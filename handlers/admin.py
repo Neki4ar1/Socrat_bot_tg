@@ -3,6 +3,12 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher import Dispatcher
 from aiogram import types
+from database.sqlite_database import SQliteRepository
+from models.words import Word
+
+
+DB_NAME = 'users_info.db'
+words_db = SQliteRepository[Word](DB_NAME, Word)
 
 
 class FSMword(StatesGroup):
@@ -38,10 +44,9 @@ async def add_translation(message: types.Message, state: FSMContext):
         data['translation'] = message.text
 
     async with state.proxy() as data:
-        await message.reply(str(data))
+        words_db.add(Word(word=str(data['word']), translation=str(data['translation'])))
 
     await state.finish()
-
 
 
 def register_add_word(dp: Dispatcher):
