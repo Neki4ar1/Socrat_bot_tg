@@ -1,5 +1,6 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher import Dispatcher
 from aiogram import types
 
@@ -13,6 +14,14 @@ class FSMword(StatesGroup):
 async def add_start(message: types.Message):
     await FSMword.word.set()
     await message.reply('write new word')
+
+
+async def cancel_add(message: types.Message, state: FSMword):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+    await state.finish()
+    await message.reply('adding was canceled')
 
 
 # @dp.message_handler(content_types=['word'], state=FSMword.word)
@@ -34,7 +43,10 @@ async def add_translation(message: types.Message, state: FSMContext):
     await state.finish()
 
 
+
 def register_add_word(dp: Dispatcher):
     dp.register_message_handler(add_start, commands=['add'], state=None)
+    dp.register_message_handler(cancel_add, state='*', commands='cancel')
+    dp.register_message_handler(cancel_add, Text(equals='cancel', ignore_case=True), state="*")
     dp.register_message_handler(add_word, state=FSMword.word)
     dp.register_message_handler(add_translation, state=FSMword.translation)
