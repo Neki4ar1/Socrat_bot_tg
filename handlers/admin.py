@@ -44,7 +44,7 @@ async def add_translation(message: types.Message, state: FSMContext):
         data['translation'] = message.text
 
     async with state.proxy() as data:
-        words_db.add(Word(word=str(data['word']), translation=str(data['translation'])))
+        await words_db.add(Word(word=str(data['word']), translation=str(data['translation'])))
 
     await state.finish()
 

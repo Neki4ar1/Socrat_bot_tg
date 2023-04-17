@@ -64,7 +64,7 @@ class SQliteRepository(AbstractRepository[T]):
             )
         con.close()
 
-    def add(self, obj: T) -> int:
+    async def add(self, obj: T) -> int:
         if obj.pk != 0:
             raise ValueError('cannot add with pk != 0')
         names = ', '.join(self.fields.keys())
@@ -80,7 +80,7 @@ class SQliteRepository(AbstractRepository[T]):
         con.close()
         return obj.pk
 
-    def get(self, pk: int) -> T | None | Any:
+    async def get(self, pk: int) -> T | None | Any:
         with sq.connect(self.db_file, timeout=5) as con:
             cur = con.cursor()
             cur.execute(f"SELECT * FROM {self.table_name} WHERE rowid = {pk}")
@@ -88,7 +88,7 @@ class SQliteRepository(AbstractRepository[T]):
         con.close()
         return res
 
-    def get_all(self, where: dict[str, Any] | None = None) -> list[T]:
+    async def get_all(self, where: dict[str, Any] | None = None) -> list[T]:
         with sq.connect(self.db_file, timeout=5) as con:
             cur = con.cursor()
             if where is None:
@@ -105,8 +105,7 @@ class SQliteRepository(AbstractRepository[T]):
         con.close()
         return res
 
-
-    def delete(self, pk: int) -> None:
+    async def delete(self, pk: int) -> None:
         if self.get(pk) is None:
             raise KeyError('this pk doesnt exist')
         with sq.connect(self.db_file, timeout=5) as con:
